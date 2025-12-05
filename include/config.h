@@ -48,7 +48,3 @@ static const std::vector<char> elems = []
 }();
 
 static const int MAX_DIGITS = elems.size();
-
-// === RANDOM ===
-// #define IS_RANDOM_USE_SEED true
-// #define RANDOM_SEED 4

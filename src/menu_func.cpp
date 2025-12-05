@@ -140,7 +140,7 @@ void menu_func::CalculatorMenu::mul()
             string num1_str = io::read_string("Введите второй множитель");
             num2 = BigNumber(num1_str);
 
-            BigNumber result = calculator::BigArithmetic::sub(num1, num2);
+            BigNumber result = calculator::BigArithmetic::mul(num1, num2);
             io::print_operation_result(result.str());
             finish = true;
         }

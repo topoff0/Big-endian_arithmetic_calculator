@@ -397,40 +397,39 @@ BigNumber calculator::BigArithmetic::mul(const BigNumber &A, const BigNumber &B)
 
     vector<char> result(n + m, ZERO);
 
-    for (int i = n - 1; i >= 0; --i)
+    for (int i = m - 1; i >= 0; --i)
     {
-        for (int j = m - 1; j >= 0; --j)
+        for (int j = n - 1; j >= 0; --j)
         {
-            auto pr = mult_digits(A[i], B[j]);
+            auto pr = mult_digits(B[i], A[j]);
             char low = pr.first;
             char carry_char = pr.second;
+            io::print("low = " + string(1, low) + ", carry_char = " + string(1, carry_char), YELLOW);
 
             int pos_low = i + j + 1;
             int pos_high = i + j;
 
+            char old = result[pos_low];
+            char summed = SmallArithmetic::add(old, low);
+            result[pos_low] = summed;
+
+            if (causes_carry(old, low))
             {
-                char old = result[pos_low];
-                char summed = SmallArithmetic::add(old, low);
-                result[pos_low] = summed;
-
-                if (causes_carry(old, low))
+                int k = pos_high;
+                while (k >= 0)
                 {
-                    int k = pos_high;
-                    while (k >= 0)
-                    {
-                        char oldk = result[k];
-                        char newk = SmallArithmetic::plus1(oldk);
-                        result[k] = newk;
+                    char oldk = result[k];
+                    char newk = SmallArithmetic::plus1(oldk);
+                    result[k] = newk;
 
-                        if (newk != ZERO)
-                            break;
+                    if (newk != ZERO)
+                        break;
 
-                        --k;
-                    }
-                    if (k < 0)
-                    {
-                        throw BigNumberException("Переполнение: результат умножения слишком длинный");
-                    }
+                    --k;
+                }
+                if (k < 0)
+                {
+                    throw BigNumberException("Переполнение: результат умножения слишком длинный");
                 }
             }
 
@@ -440,7 +439,7 @@ BigNumber calculator::BigArithmetic::mul(const BigNumber &A, const BigNumber &B)
                 char summed = SmallArithmetic::add(old, carry_char);
                 result[pos_high] = summed;
 
-                if (causes_carry(old, summed))
+                if (causes_carry(old, carry_char))
                 {
                     int k = pos_high - 1;
                     while (k >= 0)
@@ -458,6 +457,7 @@ BigNumber calculator::BigArithmetic::mul(const BigNumber &A, const BigNumber &B)
                     }
                 }
             }
+            io::print("result[" + std::to_string(pos_low) + "] = " + string(1, result[pos_low]) + ", result[" + std::to_string(pos_high) + "] = " + string(1, result[pos_high]));
         }
     }
 
@@ -587,6 +587,7 @@ bool calculator::BigArithmetic::is_zero(const BigNumber &A)
 pair<char, char> calculator::BigArithmetic::mult_digits(const char &a, const char &b)
 {
     pair<char, char> result(ZERO, ZERO);
+    io::print("times:" + string(1, b));
 
     char current = ZERO; // 'a'
 
@@ -595,7 +596,8 @@ pair<char, char> calculator::BigArithmetic::mult_digits(const char &a, const cha
         char old = result.first;
         char newResult = SmallArithmetic::add(old, a);
 
-        bool carry = causes_carry(old, newResult);
+        bool carry = causes_carry(old, a);
+        io::print("'" + string(1, old) + "' + '" + string(1, a) + "' causes_carry = " + std::to_string(carry));
 
         if (carry)
             result.second = SmallArithmetic::plus1(result.second);
@@ -616,6 +618,7 @@ bool calculator::BigArithmetic::causes_carry(const char &a, const char &b)
         {
             if (elems[i] == a && elems[j] == b)
             {
+                // io::print(string(1, elems[i]) + " and " + string(1, elems[j]) + " is_carry: " + string(1, carry[i][j]), PURPLE);
                 return carry[i][j] == '+';
             }
         }
