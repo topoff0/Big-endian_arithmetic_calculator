@@ -11,7 +11,8 @@ struct menu_func
     {
         static void print_addition_table();
         static void print_multiplication_table();
-        static void print_carry_table();
+        static void print_carry_addition_table();
+        static void print_carry_multiplication_table();
     };
 
     struct CalculatorMenu

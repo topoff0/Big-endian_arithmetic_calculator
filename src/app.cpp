@@ -92,7 +92,10 @@ void app::handle_start_work_menu(int choice)
         menu_func::StartWorkMenu::print_multiplication_table();
         break;
     case 4:
-        menu_func::StartWorkMenu::print_carry_table();
+        menu_func::StartWorkMenu::print_carry_addition_table();
+        break;
+    case 5:
+        menu_func::StartWorkMenu::print_carry_multiplication_table();
         break;
 
     default:

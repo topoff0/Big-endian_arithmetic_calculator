@@ -28,6 +28,8 @@ public:
         static vector<vector<char>> addition_table();
         static vector<vector<char>> multiplication_table();
         static vector<vector<char>> carry_table();
+        static vector<vector<char>> carry_addition_table();
+        static vector<vector<char>> carry_mult_table();
     };
 
     struct BigArithmetic
@@ -64,11 +66,11 @@ public:
         static BigNumber mul(const BigNumber &A, const BigNumber &B);
         static pair<BigNumber, BigNumber> div(const BigNumber &A, const BigNumber &B);
         static BigNumber exp(const BigNumber &A, const BigNumber &B);
+        static pair<char, char> mult_digits(const char &a, const char &b);
 
     private:
         static int compare_abs(const BigNumber &A, const BigNumber &B);
         static bool is_zero(const BigNumber &A);
-        static pair<char, char> mult_digits(const char &a, const char &b);
         static bool causes_carry(const char &a, const char &b);
     };
 };

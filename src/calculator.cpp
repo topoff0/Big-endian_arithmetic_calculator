@@ -156,6 +156,59 @@ vector<vector<char>> calculator::SmallArithmetic::carry_table()
     return c_table;
 }
 
+vector<vector<char>> calculator::SmallArithmetic::carry_addition_table()
+{
+    vector<vector<char>> table(MAX_DIGITS, vector<char>(MAX_DIGITS));
+
+    for (int i = 0; i < MAX_DIGITS; i++)
+    {
+        for (int j = 0; j < MAX_DIGITS; j++)
+        {
+            char x = elems[i];
+            char y = elems[j];
+
+            char result = x;
+            char carry = ZERO;
+
+            char current = ZERO;
+            while (current != y)
+            {
+                char old = result;
+                result = plus1(result);
+
+                if (result == ZERO)
+                    carry = plus1(carry);
+
+                current = plus1(current);
+            }
+
+            table[i][j] = carry;
+        }
+    }
+
+    return table;
+}
+
+vector<vector<char>> calculator::SmallArithmetic::carry_mult_table()
+{
+    vector<vector<char>> table(MAX_DIGITS, vector<char>(MAX_DIGITS));
+
+    for (int i = 0; i < MAX_DIGITS; i++)
+    {
+        for (int j = 0; j < MAX_DIGITS; j++)
+        {
+            char x = elems[i];
+            char y = elems[j];
+
+            auto pr = calculator::BigArithmetic::mult_digits(x, y);
+
+            table[i][j] = pr.second;
+        }
+    }
+
+    return table;
+}
+
 calculator::BigArithmetic::BigNumber::BigNumber(const string &s)
 {
     if (s.empty())
@@ -404,7 +457,7 @@ BigNumber calculator::BigArithmetic::mul(const BigNumber &A, const BigNumber &B)
             auto pr = mult_digits(B[i], A[j]);
             char low = pr.first;
             char carry_char = pr.second;
-            io::print("low = " + string(1, low) + ", carry_char = " + string(1, carry_char), YELLOW);
+            // io::print("low = " + string(1, low) + ", carry_char = " + string(1, carry_char), YELLOW);
 
             int pos_low = i + j + 1;
             int pos_high = i + j;
@@ -457,7 +510,7 @@ BigNumber calculator::BigArithmetic::mul(const BigNumber &A, const BigNumber &B)
                     }
                 }
             }
-            io::print("result[" + std::to_string(pos_low) + "] = " + string(1, result[pos_low]) + ", result[" + std::to_string(pos_high) + "] = " + string(1, result[pos_high]));
+            // io::print("result[" + std::to_string(pos_low) + "] = " + string(1, result[pos_low]) + ", result[" + std::to_string(pos_high) + "] = " + string(1, result[pos_high]));
         }
     }
 
@@ -558,9 +611,39 @@ pair<BigNumber, BigNumber> calculator::BigArithmetic::div(const BigNumber &A, co
     return {Q, R};
 }
 
-BigNumber calculator::BigArithmetic::exp(const BigNumber &A, const BigNumber &B)
+calculator::BigArithmetic::BigNumber
+calculator::BigArithmetic::exp(const BigNumber &A, const BigNumber &B)
 {
-    return BigNumber();
+    if (B.is_negative())
+        throw BigNumberException("Отрицательная степень не поддерживается");
+
+    if (is_zero(A) && is_zero(B))
+        throw BigNumberException("Не определено");
+
+    if (is_zero(B))
+    {
+        char one_char = SmallArithmetic::plus1(ZERO);
+        return BigNumber(false, string(1, one_char));
+    }
+
+    char one_char = SmallArithmetic::plus1(ZERO);
+    BigNumber one(false, string(1, one_char));
+    if (B.size() == 1 && B[0] == one_char)
+        return A;
+
+    BigNumber result = A;
+    BigNumber counter = B;
+
+    // counter = counter - 1, т.к. result уже содержит A
+    counter = sub(counter, one);
+
+    while (!is_zero(counter))
+    {
+        result = mul(result, A);
+        counter = sub(counter, one);
+    }
+
+    return result;
 }
 
 int calculator::BigArithmetic::compare_abs(const BigNumber &A, const BigNumber &B)
@@ -587,7 +670,7 @@ bool calculator::BigArithmetic::is_zero(const BigNumber &A)
 pair<char, char> calculator::BigArithmetic::mult_digits(const char &a, const char &b)
 {
     pair<char, char> result(ZERO, ZERO);
-    io::print("times:" + string(1, b));
+    // io::print("times:" + string(1, b));
 
     char current = ZERO; // 'a'
 
@@ -597,7 +680,7 @@ pair<char, char> calculator::BigArithmetic::mult_digits(const char &a, const cha
         char newResult = SmallArithmetic::add(old, a);
 
         bool carry = causes_carry(old, a);
-        io::print("'" + string(1, old) + "' + '" + string(1, a) + "' causes_carry = " + std::to_string(carry));
+        // io::print("'" + string(1, old) + "' + '" + string(1, a) + "' causes_carry = " + std::to_string(carry));
 
         if (carry)
             result.second = SmallArithmetic::plus1(result.second);

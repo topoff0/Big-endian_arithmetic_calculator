@@ -44,10 +44,17 @@ void menu_func::StartWorkMenu::print_multiplication_table()
     io::wait_enter();
 }
 
-void menu_func::StartWorkMenu::print_carry_table()
+void menu_func::StartWorkMenu::print_carry_addition_table()
 {
-    auto c_table = calculator::SmallArithmetic::carry_table();
+    auto c_table = calculator::SmallArithmetic::carry_addition_table();
     io::print_table("Таблица переноса малой конечной арифметики", c_table, '~');
+    io::wait_enter();
+}
+
+void menu_func::StartWorkMenu::print_carry_multiplication_table()
+{
+    auto c_table = calculator::SmallArithmetic::carry_mult_table();
+    io::print_table("Таблица переноса малой конечной арифметики", c_table, 'x');
     io::wait_enter();
 }
 
@@ -203,6 +210,37 @@ void menu_func::CalculatorMenu::div()
 
 void menu_func::CalculatorMenu::exp()
 {
-    io::print_header("Еще в разработке -.-", BOXED, PURPLE);
+    bool finish = false;
+    bool first_input_ok = false;
+    while (!finish)
+    {
+        try
+        {
+            static BigNumber num1;
+            static BigNumber num2;
+            if (!first_input_ok)
+            {
+                string num1_str = io::read_string("Введите основание степени");
+                num1 = BigNumber(num1_str);
+                first_input_ok = true;
+            }
+            string num1_str = io::read_string("Введите показатель степени");
+            num2 = BigNumber(num1_str);
+
+            BigNumber result = calculator::BigArithmetic::exp(num1, num2);
+            io::print_operation_result(result.str());
+            finish = true;
+        }
+        catch (const BigNumberException &e)
+        {
+            finish = true;
+            io::print_error(e.what());
+        }
+        catch (const std::exception &e)
+        {
+            finish = true;
+            io::print_error(e.what());
+        }
+    }
     io::wait_enter();
 }
